@@ -1,26 +1,11 @@
-#define _WINSOCK_DEPRECATED_NO_WARNINGS
-#include <winsock2.h>
 #include <windows.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <math.h>
 
 #define ID_EDIT_BOX 101
 #define ID_BUTTON   102
 
 HWND hEdit;
-
-double GetEuro() {
-
-
-    return 16.0;
-}
-
-double GetDolar() {
-
-
-    return 12.0;
-}
 
 enum type {
     
@@ -96,12 +81,10 @@ int lexer(unsigned const char* source) {
         else if (source[i] == 'p')tokens[k].t = percent_operator, tokens[k].fields.precedence = PER, k++, i++;
         else if (source[i] == '/')tokens[k].t = div_operator, tokens[k].fields.precedence = DIV, k++, i++;
         else if (source[i] == '*')tokens[k].t = mul_operator, tokens[k].fields.precedence = MUL, k++, i++;
-        else if (source[i] == 'e')tokens[k].t = operand, tokens[k].fields.operand = GetEuro(), k++, i++;
-        else if (source[i] == 'd')tokens[k].t = operand, tokens[k].fields.operand = GetDolar(), k++, i++;
         else {
 
             char ii[16];
-            snprintf(ii, 4, "%d", i);
+            snprintf(ii, 16, "%d", i);
             MessageBoxA(NULL, "lexer error", ii, 1);
             return -1;
 
@@ -111,64 +94,27 @@ int lexer(unsigned const char* source) {
 
 }
 
-int parser() {
-    
-    for (int i = 0; i < k;) {
-           
-        if (i < k - 1 && tokens[i].t == operand && 
-            tokens[i + 1].t >= plus_operator &&
-            tokens[i + 1].t <= percent_operator) {
-            i += 2;
-        }
-        else if (i == k - 1 && tokens[i].t == operand &&
-            tokens[i - 1].t >= plus_operator &&
-            tokens[i - 1].t <= percent_operator) {
-            i += 1;
-        }
-        else if (i == 0 && tokens[i].t == sub_operator && tokens[i + 1].t == operand) {
+typedef enum {
+    EXPECT_OPERAND,
+    EXPECT_OPERATOR
+} ParserState;
 
-            tokens[i].t = unary_sub;
-            tokens[i].fields.precedence = UNARY;
-            i += 2;
-        }
-        else if (i > 0 && tokens[i-1].t >= plus_operator && 
-                tokens[i - 1].t <= percent_operator && 
-                tokens[i].t == sub_operator && 
-                tokens[i + 1].t == operand ) {
 
-            tokens[i].t = unary_sub;
-            tokens[i].fields.precedence = UNARY;
-            i += 2;
-        }
-        
-        else {
-            
-            char ii[16];
-            snprintf(ii, 4, "%d", k);
-            MessageBoxA(NULL, "parser error", ii, 1);
-            return -1;
-            
-        }
-        
 
-    }
-
-}
 
 void postfix() {
-/* shuting yard */
-    
+    /* shunting yard */
     int t = 0; /* index output */
     int top = 0; /* index stack */
     for (int i = 0; i < k; i++) {
 
         if (tokens[i].t == operand) {
-             output[t++] = tokens[i];
-             
+            output[t++] = tokens[i];
+
         }
         else if (tokens[i].t >= plus_operator &&
             tokens[i].t <= unary_sub) {
-            while (top && stack[top].fields.precedence >= tokens[i].fields.precedence) {
+            while (top && stack[top - 1].fields.precedence > tokens[i].fields.precedence) {
                 output[t++] = stack[--top];
             }
             stack[top++] = tokens[i];
@@ -182,7 +128,68 @@ void postfix() {
         output[t++] = stack[--top];
 
     }
+
+}
+
+int parser() {
     
+    ParserState state = EXPECT_OPERAND;
+
+    int i;
+    for (i = 0; i < k; i++) {
+        
+        switch (state) {
+
+        case EXPECT_OPERAND:
+            if (tokens[i].t == sub_operator) {
+                
+                /* last token type check  */
+                if (i == k - 1)goto parser_error;
+                
+                tokens[i].t = unary_sub;
+                tokens[i].fields.precedence = UNARY;                            
+            
+            }
+
+            else if (tokens[i].t == operand) {
+                state = EXPECT_OPERATOR; 
+            }
+
+            else {
+                goto parser_error;
+            }
+            
+            break;
+       
+        case EXPECT_OPERATOR:
+            
+            if (tokens[i].t >= plus_operator && tokens[i].t <= percent_operator) {
+                state = EXPECT_OPERAND;
+            }
+            
+            else {
+                goto parser_error;
+            }
+            
+            break;
+        }
+
+    }
+
+    /* last token type check  */
+    if (state != EXPECT_OPERATOR)goto parser_error;
+    
+    postfix(); /* build AST */
+    
+    return;
+
+parser_error: {
+        char ii[16];
+        snprintf(ii, sizeof(ii), "%d", i);
+        MessageBoxA(NULL, "(Syntax Error)", ii, MB_OK | MB_ICONERROR);
+        return -1;
+    }
+
 }
 
 void eval(char * result , int size) {
@@ -249,7 +256,6 @@ void exec(unsigned const char* source,char * result, int size) {
     if (parser() == -1) {
         return;
     }
-    postfix();
     eval(result,size);
 
 }
