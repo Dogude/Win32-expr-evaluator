@@ -5,6 +5,7 @@
 * Numbers collected as double value in C
 * 98 p 3  means 98x3%
 * Program has a one Text Box and Button, computed result printed in MessageBoxA function
+* Does not support open '(' and closed ')' parentheses
 ``` Requires MSVC C++ Desktop Development Toolset ```
  <table border="0">
   <tr> 
