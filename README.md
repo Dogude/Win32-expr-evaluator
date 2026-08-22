@@ -1,10 +1,11 @@
 # Expression Evaluator Calculator Using Shunting Yard Algorithm
-# Requires MSVC C++ Desktop Development Toolset
+ 
 * There are 6 operator types (DIV,MUL,SUB,UNARY_SUB,ADD,PERCENT)
 * Operands are only double values, highest precedence operator is PERCENT
 * Numbers collected as double value in C
 * 98 p 3  means 98x3%
 * Program has a one Text Box and Button, computed result printed in MessageBoxA function
+``` Requires MSVC C++ Desktop Development Toolset ```
  <table border="0">
   <tr> 
 <td> <img width="386" height="265" alt="image" src="https://github.com/user-attachments/assets/35788dc7-207f-4944-a597-fcc64cea0831" /> </td>
