@@ -1,5 +1,5 @@
 # Expression Evaluator Calculator Using Shunting Yard Algorithm
-
+# Requires MSVC C++ Desktop Development Toolset
 * There are 6 operator types (DIV,MUL,SUB,UNARY_SUB,ADD,PERCENT)
 * Operands are only double values, highest precedence operator is PERCENT
 * Numbers collected as double value in C
