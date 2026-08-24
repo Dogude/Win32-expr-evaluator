@@ -1,11 +1,27 @@
 # Expression Evaluator Calculator Using Shunting Yard Algorithm
  
 * There are 6 operator types (DIV,MUL,SUB,UNARY_SUB,ADD,PERCENT)
-* Operands are only double values, highest precedence operator is PERCENT
+ ```
+struct token {
+    enum type t;
+    union {
+        int precedence;
+        double operand;
+    } fields;
+};
+#define PLUS 10 /* + */
+#define SUB 10  /* - */
+#define MUL 11 /* * */
+#define DIV 11 /* / */
+#define PER 11 /* p */
+#define UNARY  12 /* unary - */
+```
+* Operands are only double values, highest precedence operator is UNARY(unary_sub)
 * Numbers collected as double value in C
-* 98 p 3  means 98x3%
+* A p B is doing A * (B/100)
 * Program has a one Text Box and Button, computed result printed in MessageBoxA function
 * Does not support open '(' and closed ')' parentheses
+  
 ``` Requires MSVC C++ Desktop Development Toolset ```
  <table border="0">
   <tr> 
