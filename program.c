@@ -145,9 +145,7 @@ int parser() {
         case EXPECT_OPERAND:
             if (tokens[i].t == sub_operator) {
                 
-                /* last token type check  */
-                if (i == k - 1)goto parser_error;
-                
+               
                 tokens[i].t = unary_sub;
                 tokens[i].fields.precedence = UNARY;                            
                 
