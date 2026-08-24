@@ -36,6 +36,7 @@ struct token {
 #define PER 11 /* p */
 #define UNARY  12 /* unary - */
  
+
 struct token tokens[32] ;
 struct token stack[32] ;
 struct token output[32] ;
@@ -96,7 +97,8 @@ int lexer(unsigned const char* source) {
 
 typedef enum {
     EXPECT_OPERAND,
-    EXPECT_OPERATOR
+    EXPECT_OPERATOR,
+    C
 } ParserState;
 
 
@@ -114,7 +116,7 @@ void postfix() {
         }
         else if (tokens[i].t >= plus_operator &&
             tokens[i].t <= unary_sub) {
-            while (top && stack[top - 1].fields.precedence > tokens[i].fields.precedence) {
+            while (top && stack[top - 1].fields.precedence >= tokens[i].fields.precedence) {
                 output[t++] = stack[--top];
             }
             stack[top++] = tokens[i];
@@ -134,7 +136,7 @@ void postfix() {
 int parser() {
     
     ParserState state = EXPECT_OPERAND;
-
+    int test = 0;
     int i;
     for (i = 0; i < k; i++) {
         
@@ -148,7 +150,9 @@ int parser() {
                 
                 tokens[i].t = unary_sub;
                 tokens[i].fields.precedence = UNARY;                            
-            
+                
+                state = C;
+
             }
 
             else if (tokens[i].t == operand) {
@@ -156,11 +160,25 @@ int parser() {
             }
 
             else {
+                test = 1;
                 goto parser_error;
             }
             
             break;
        
+        case C: /* two unary_sub not allowed  */
+            if (tokens[i].t == operand) {
+            
+                state = EXPECT_OPERATOR;
+            
+            }
+            
+            else {
+                test = 2;
+                goto parser_error;
+            }
+            break;
+
         case EXPECT_OPERATOR:
             
             if (tokens[i].t >= plus_operator && tokens[i].t <= percent_operator) {
@@ -168,6 +186,7 @@ int parser() {
             }
             
             else {
+                test = 3;
                 goto parser_error;
             }
             
@@ -177,16 +196,16 @@ int parser() {
     }
 
     /* last token type check  */
-    if (state != EXPECT_OPERATOR)goto parser_error;
+    if (state != EXPECT_OPERATOR) { test = 4; goto parser_error; };
     
     postfix(); /* build AST */
     
     return;
 
 parser_error: {
-        char ii[16];
-        snprintf(ii, sizeof(ii), "%d", i);
-        MessageBoxA(NULL, "(Syntax Error)", ii, MB_OK | MB_ICONERROR);
+        char ii[64];
+        snprintf(ii, sizeof(ii), "error case : %d  , token count : %d, index : %d", test,k,i);
+        MessageBoxA(NULL, ii, "(Syntax Error)", MB_OK | MB_ICONERROR);
         return -1;
     }
 
