@@ -22,7 +22,7 @@ struct token {
 * Program has a one Text Box and Button, computed result printed in MessageBoxA function
 * Does not support open '(' and closed ')' parentheses
   
-``` Requires MSVC C++ Desktop Development Toolset ```
+``` Requires MSVC C Desktop Development Toolset ```
  <table border="0">
   <tr> 
 <td> <img width="386" height="265" alt="image" src="https://github.com/user-attachments/assets/35788dc7-207f-4944-a597-fcc64cea0831" /> </td>
